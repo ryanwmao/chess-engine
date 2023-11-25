@@ -22,7 +22,7 @@ def square_to_leftshift_bits(row: str, col: int) -> Optional[int]:
 
 def int_to_square(num: int) -> Optional[Tuple[str, int]]:
   '''
-  Convert an integer corresponding to 
+  Convert an integer corresponding to a cell to the row, col pair
   '''
   if isinstance(num, np.uint64) and bin(num).count("1") == 1:
     lshift = 0
@@ -243,11 +243,11 @@ class Player:
                   res.append((Player.pawn, i, move_forward, piece))
               else:
                  res.append((Player.pawn, i, move_forward))
-            # push two spaces from start
-            if ((int(i / 8) == 1 and self.white) or \
-                (int(i / 8) == 6) and not self.white) and \
-                can_move(move_double):
-                  res.append((Player.pawn, i, move_double))
+              # push two spaces from start
+              if ((int(i / 8) == 1 and self.white) or \
+                  (int(i / 8) == 6) and not self.white) and \
+                  can_move(move_double):
+                     res.append((Player.pawn, i, move_double))
         
         # en passant
         if other.last_move and other.last_move[0] == Player.pawn \
@@ -448,20 +448,50 @@ class Player:
 
 
 class Game:
-    def __init__(self):
-        self.player1 = Player(white=True)
-        self.player2 = Player(white=False)
+    def __init__(self, player_white=True):
+        self.cpu = Player(white=not player_white)
+        self.player = Player(white=player_white)
+        self.player_white = player_white
+
+    def player_move(self, move):
+         self.player, self.cpu = self.player.make_move(move, self.cpu)
+    
+    def cpu_move(self, move):
+         self.cpu, self.player = self.cpu.make_move(move, self.player)
+
+    def minimax(self, player, other, depth=6):
+       depth = min(depth, 6)
+       best_move = None
+       best_move_val = float('-inf') if player.white else float('inf')
+       for move in player.possible_moves(other):
+          player_moved, other_moved = player.make_move(move, other)
+          if depth > 0:
+             _, val = self.minimax(other_moved, player_moved, depth-1)
+          else:
+             val = player_moved.naive_score(other_moved)
+
+          if player.white:
+               if val > best_move_val:
+                  best_move = move
+                  best_move_val = val
+          else:
+               if val < best_move_val:
+                  best_move = move
+                  best_move_val = val
+
+       return best_move, best_move_val
+
 
     def pretty_print(self):
         board = [['.' for _ in range(8)] for _ in range(8)]
         for i in range(8):
             for j in range(8):
-                piece1 = self.player1.piece_at_int(square_to_leftshift_bits(chr(ord('a') + j), i + 1))
-                piece2 = self.player2.piece_at_int(square_to_leftshift_bits(chr(ord('a') + j), i + 1))
-                if piece1:
-                    board[i][j] = 'w' + piece1
-                elif piece2:
-                    board[i][j] = 'b' + piece2
+                cpu_piece = self.cpu.piece_at_int(square_to_leftshift_bits(chr(ord('a') + j), i + 1))
+                player_piece = self.player.piece_at_int(square_to_leftshift_bits(chr(ord('a') + j), i + 1))
+                if cpu_piece:
+                    board[i][j] = ('b' if self.player_white else 'w') + cpu_piece
+                elif player_piece:
+                    board[i][j] = ('w' if self.player_white else 'b') + player_piece
 
         print("    a   b   c   d   e   f   g   h")
         print("    -----------------------------")
