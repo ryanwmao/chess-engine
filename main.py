@@ -14,32 +14,35 @@ def main():
     white_turn = True
 
     while True:
-        os.system('clear')
         game.pretty_print()
         if game.player_white == white_turn:
-            move_input = input("Enter your move (from_col from_row to_col to_row): ")
+            move_input = input("Enter your move (e.g. e2 e4): ")
         else:
             print("CPU is thinking...")
             move, _ = game.minimax(game.cpu, game.player, depth)
             game.cpu_move(move)
             white_turn = not white_turn
+            os.system('clear')
             continue
 
         try:
-            if len(move_input.split()) == 4:
-                from_col, from_row, to_col, to_row = move_input.split()
-                from_square = board.square_to_leftshift_bits(from_col, int(from_row))
-                to_square = board.square_to_leftshift_bits(to_col, int(to_row))
+            if len(move_input.split()) == 2:
+                from_pos, to_pos = move_input.split()
+                from_square = board.square_to_leftshift_bits(from_pos[0], int(from_pos[1]))
+                to_square = board.square_to_leftshift_bits(to_pos[0], int(to_pos[1]))
 
                 game.player_move((game.player.piece_at_int(from_square), from_square, to_square))
+                os.system('clear')
             else:
-                from_col, from_row, to_col, to_row, promo_piece = move_input.split()
-                from_square = board.square_to_leftshift_bits(from_col, int(from_row))
-                to_square = board.square_to_leftshift_bits(to_col, int(to_row))
+                from_pos, to_pos, promo_piece = move_input.split()
+                from_square = board.square_to_leftshift_bits(from_pos[0], int(from_pos[1]))
+                to_square = board.square_to_leftshift_bits(to_pos[0], int(to_pos[1]))
 
                 game.player_move((game.player.piece_at_int(from_square), from_square, to_square, promo_piece))
+                os.system('clear')
             white_turn = not white_turn
-        except ValueError:
+        except:
+            os.system('clear')
             print("Invalid input. Please enter a valid move.")
         
 

@@ -226,12 +226,13 @@ class Player:
         sign = 1 if self.white else -1
         # pawn taking diagonally
         for pos in [i + 7 * sign, i + 9 * sign]:
-            if other.piece_at_int(pos): 
-               if (self.white and int(pos / 8) == 7) or (not self.white and int(pos / 8) == 0):
-                  for piece in [Player.bishop, Player.knight, Player.rook, Player.queen]:
-                     res.append((Player.pawn, i, pos, piece))
-               else:
-                  res.append((Player.pawn, i, pos))
+            if abs(pos % 8 - col) == 1:
+               if other.piece_at_int(pos): 
+                  if (self.white and int(pos / 8) == 7) or (not self.white and int(pos / 8) == 0):
+                     for piece in [Player.bishop, Player.knight, Player.rook, Player.queen]:
+                        res.append((Player.pawn, i, pos, piece))
+                  else:
+                     res.append((Player.pawn, i, pos))
 
         # pawn pushing forward, or pushing double from start
         move_forward, move_double = i + 8 * sign, i + 16 * sign
@@ -454,7 +455,10 @@ class Game:
         self.player_white = player_white
 
     def player_move(self, move):
-         self.player, self.cpu = self.player.make_move(move, self.cpu)
+         if move in self.player.possible_moves(self.cpu):
+            self.player, self.cpu = self.player.make_move(move, self.cpu)
+         else:
+            raise Exception("Invalid Move")
     
     def cpu_move(self, move):
          self.cpu, self.player = self.cpu.make_move(move, self.player)
@@ -504,7 +508,7 @@ class Game:
                 elif piece[0] == 'b':
                     print(f" {Player.b_icons[piece[1]]} ", end=" ")  # Black piece
                 else:
-                    print(" • ", end=" ")  # Empty square
+                    print(" . ", end=" ")  # Empty square
             print(f" {i+1}")
         print("    -----------------------------")
         print("    a   b   c   d   e   f   g   h")
