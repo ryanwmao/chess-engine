@@ -1,4 +1,5 @@
 import board
+import numpy as np
 
 def test_conversions():
   for ch in [chr(i) for i in range(97, 105)]:
@@ -12,3 +13,10 @@ if __name__ == "__main__":
   # test_conversions()
   game = board.Game()
   game.pretty_print()
+  print(game.player1.possible_moves(game.player2))
+  print()
+  game.player1.pawn = np.uint64(1 << 40)
+  game.pretty_print()
+  print(game.player1.possible_moves(game.player2))
+
+  # print(game.player1.possible_moves(game.player2))
