@@ -12,6 +12,9 @@ def main():
         difficulty = input("Please choose 'e' for easy or 'h' for hard: ").lower()
 
     depth = int(input("Enter the depth for CPU minimax: "))
+    pruning = input("AB Pruning? (y/n): ").lower()
+    while pruning not in ['y', 'n']:
+        pruning = input("Please choose 'y' or 'n' for pruning: ").lower()
 
     game = board.Game(player_white=(player_color == 'w'), hard=(difficulty == 'h'))
 
@@ -23,7 +26,10 @@ def main():
             move_input = input("Enter your move (e.g. e2 e4): ")
         else:
             print("CPU is thinking...")
-            move, _ = game.minimax(game.cpu, game.player, depth)
+            if pruning:
+                move, _ = game.minimax_ab(game.cpu, game.player, depth)
+            else:
+                move, _ = game.minimax(game.cpu, game.player, depth)
             if move is None:
                 print("You won!")
                 break
