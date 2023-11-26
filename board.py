@@ -62,7 +62,40 @@ class Player:
         'b': 3,
         'q': 9,
         'k': 1000
-    }
+   }
+  
+  pawn_position_values = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+    [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+    [0.3, 0.3, 0.3, 0.4, 0.4, 0.3, 0.3, 0.3],
+    [0.2, 0.2, 0.2, 0.25, 0.25, 0.2, 0.2, 0.2],
+    [0.1, 0.1, 0.1, 0.15, 0.15, 0.1, 0.1, 0.1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+  ]
+
+  knight_position_values = [
+    [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
+    [-0.2, -0.05,  0.0,  0.0,  0.0,  0.0, -0.05, -0.2],
+    [-0.1,  0.0,  0.05,  0.1,  0.1,  0.05,  0.0, -0.1],
+    [-0.1,  0.02,  0.1,  0.25,  0.25,  0.1,  0.1, -0.1],
+    [-0.1,  0.0,   0.1,  0.25,  0.25,  0.1,  0.0, -0.1],
+    [-0.1,  0.01,  0.05,  0.3,  0.3,  0.05,  0.01, -0.1],
+    [-0.2, -0.05,  0.0,  0.1,  0.1,  0.0, -0.05, -0.2],
+    [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2]
+   ]
+  
+  king_position_values = [
+    [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    [-0.2, -0.3, -0.3, -0.4, -0.4, -0.3, -0.3, -0.2],
+    [-0.1, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.1],
+    [ 0.2,  0.2,  0.0,  0.0,  0.0,  0.0,  0.2,  0.2],
+    [ 0.2,  0.4,  0.1,  0.0,  0.0,  0.1,  0.4,  0.2]
+   ]
 
   def __init__(self, white: bool, copy=None):
    if copy:
@@ -96,9 +129,38 @@ class Player:
          score += bin(pieces).count('1') * Player.piece_values[getattr(Player, piece_type)]
       return score
   
+  def sum_piece_bonuses(self): 
+      score = 0
+      for piece_type in Player.pieces:
+         pieces = getattr(self, piece_type)
+         score += bin(pieces).count('1') * Player.piece_values[getattr(Player, piece_type)]
+         if piece_type == 'pawn' or piece_type == 'knight' or piece_type == 'king':
+            for i in range(8):
+               for j in range(8):
+                  if piece_type == 'pawn' and pieces & np.uint64(1 << (i * 8 + j)):
+                     if self.white:
+                        score += Player.pawn_position_values[7-i][j]
+                     else:
+                        score += Player.pawn_position_values[i][j]
+                  elif piece_type == 'knight' and pieces & np.uint64(1 << (i * 8 + j)):
+                     if self.white:
+                        score += Player.pawn_position_values[7-i][j]
+                     else:
+                        score += Player.pawn_position_values[i][j]
+                  elif piece_type == 'king' and pieces & np.uint64(1 << (i * 8 + j)):
+                     if self.white:
+                        score += Player.pawn_position_values[7-i][j]
+                     else:
+                        score += Player.pawn_position_values[i][j]
+      return score
+  
   def naive_score(self, other):
       if self.white: return self.sum_pieces() - other.sum_pieces()
       return other.sum_pieces() - self.sum_pieces()
+  
+  def positional_score(self, other):
+     if self.white: return self.sum_piece_bonuses() - other.sum_piece_bonuses()
+     return other.sum_piece_bonuses() - self.sum_piece_bonuses()
 
   def reset(self, white: bool) -> None:
     self.pawn = np.uint64(0)
@@ -158,7 +220,7 @@ class Player:
                     sign = -1 if self.white else 1
                     attack_left = i + 7 * sign
                     attack_right = i + 9 * sign
-                    if square in [attack_left, attack_right]:
+                    if square in [attack_left, attack_right] and abs((square % 8) - col) == 1:
                         return True
                 
                 if other.piece_at_int(i) == Player.rook or other.piece_at_int(i) == Player.queen:
@@ -210,6 +272,13 @@ class Player:
                                     return True
         
         return False 
+
+  def is_king_under_attack(self, other):
+     sq = None
+     for i in range(64):
+        if self.king & np.uint64(1 << i):
+           sq = i
+     return self.is_square_under_attack(sq, other)
 
   # we don't account for pins under the assumption that exposing the king
   # by moving the pin will be avoided through our reward function
@@ -378,7 +447,7 @@ class Player:
                      not self.is_square_under_attack(i-2, other):
                      res.append((Player.king, i, i-2))
             if self.can_castle_right:
-               if can_move(i+1) and can_move(i+2) and can_move(i+3):
+               if can_move(i+1) and can_move(i+2):
                   if not self.is_square_under_attack(i, other) and \
                      not self.is_square_under_attack(i+1, other) and \
                      not self.is_square_under_attack(i+2, other):
@@ -449,10 +518,11 @@ class Player:
 
 
 class Game:
-    def __init__(self, player_white=True):
+    def __init__(self, player_white=True, hard=False):
         self.cpu = Player(white=not player_white)
         self.player = Player(white=player_white)
         self.player_white = player_white
+        self.hard = hard
 
     def player_move(self, move):
          if move in self.player.possible_moves(self.cpu):
@@ -469,10 +539,14 @@ class Game:
        best_move_val = float('-inf') if player.white else float('inf')
        for move in player.possible_moves(other):
           player_moved, other_moved = player.make_move(move, other)
+          if player_moved.is_king_under_attack(other_moved): continue
           if depth > 0:
              _, val = self.minimax(other_moved, player_moved, depth-1)
           else:
-             val = player_moved.naive_score(other_moved)
+             if self.hard:
+                val = player_moved.positional_score(other_moved)
+             else:
+                val = player_moved.naive_score(other_moved)
 
           if player.white:
                if val > best_move_val:

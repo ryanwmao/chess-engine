@@ -7,9 +7,13 @@ def main():
     while player_color not in ['w', 'b']:
         player_color = input("Please choose 'w' for white or 'b' for black: ").lower()
 
+    difficulty = input("Choose difficulty (e/h): ").lower()
+    while difficulty not in ['e', 'h']:
+        difficulty = input("Please choose 'e' for easy or 'h' for hard: ").lower()
+
     depth = int(input("Enter the depth for CPU minimax: "))
 
-    game = board.Game(player_white=(player_color == 'w'))
+    game = board.Game(player_white=(player_color == 'w'), hard=(difficulty == 'h'))
 
     white_turn = True
 
@@ -20,6 +24,9 @@ def main():
         else:
             print("CPU is thinking...")
             move, _ = game.minimax(game.cpu, game.player, depth)
+            if move is None:
+                print("You won!")
+                break
             game.cpu_move(move)
             white_turn = not white_turn
             os.system('clear')
