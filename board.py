@@ -71,38 +71,67 @@ class Player:
 
     piece_values = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 1000}
 
-    pawn_position_values = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-        [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
-        [0.3, 0.3, 0.3, 0.4, 0.4, 0.3, 0.3, 0.3],
-        [0.2, 0.2, 0.2, 0.25, 0.25, 0.2, 0.2, 0.2],
-        [0.1, 0.1, 0.1, 0.15, 0.15, 0.1, 0.1, 0.1],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-    ]
 
-    knight_position_values = [
-        [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
-        [-0.2, -0.05, 0.0, 0.0, 0.0, 0.0, -0.05, -0.2],
-        [-0.1, 0.0, 0.05, 0.1, 0.1, 0.05, 0.0, -0.1],
-        [-0.1, 0.02, 0.1, 0.25, 0.25, 0.1, 0.1, -0.1],
-        [-0.1, 0.0, 0.1, 0.25, 0.25, 0.1, 0.0, -0.1],
-        [-0.1, 0.01, 0.05, 0.3, 0.3, 0.05, 0.01, -0.1],
-        [-0.2, -0.05, 0.0, 0.1, 0.1, 0.0, -0.05, -0.2],
-        [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
-    ]
+    pawn_0_5_values = 0b11111111 << 48
+    pawn_0_4_values = 0b1111111100011 << 35
+    pawn_0_3_values = 0b11100111 << 32
+    pawn_0_25_values = 0b11 << 27
+    pawn_0_2_values = 0b11100111 << 24
+    pawn_0_15_values = 0b11 << 19
+    pawn_0_1_values = 0b11100111 << 16
+    pawn_position_values = [(0.5, pawn_0_5_values), (0.4, pawn_0_4_values), (0.3, pawn_0_3_values), (0.25, pawn_0_25_values), (0.2, pawn_0_2_values), (0.15, pawn_0_15_values), (0.1, pawn_0_1_values)]
 
-    king_position_values = [
-        [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-        [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-        [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-        [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-        [-0.2, -0.3, -0.3, -0.4, -0.4, -0.3, -0.3, -0.2],
-        [-0.1, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.1],
-        [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2],
-        [0.2, 0.4, 0.1, 0.0, 0.0, 0.1, 0.4, 0.2],
-    ]
+    knight_n0_2_values  = 0b1000000110000001000000000000000000000000000000001000000110000001
+    knight_n0_1_values  = 0b0100001000000000100000011000000110000001100000010000000001000010
+    knight_n0_05_values = 0b0011110001000010000000000000000000000000000000000100001000111100
+    knight_0_05_values  = 0b0000000000000000001001000000000000000000001001000000000000000000
+    knight_0_1_values   = 0b0000000000000000000110000110011000100100000000000001100000000000
+    knight_0_25_values  = 0b0000000000000000000000000001100000011000000000000000000000000000
+    knight_0_3_values   = 0b11 << 19
+    knight_position_values = [(-0.2, knight_n0_2_values), (-0.1, knight_n0_1_values), (-0.05, knight_n0_05_values), (0.05, knight_0_05_values), (0.1, knight_0_1_values), (0.25, knight_0_25_values), (0.3, knight_0_3_values)]
+
+    king_n0_1_values = 0b10000001 << 16
+    king_n0_2_values = 0b10000001011111100000000000000000
+    king_n0_3_values = 0b1000000110000001100000011000000101100110000000000000000000000000
+    king_n0_4_values = 0b0110011001100110011001100110011000011000000000000000000000000000
+    king_n0_5_values = 0b0001100000011000000110000001100000000000000000000000000000000000
+    king_0_1_values  = 0b100100
+    king_0_2_values  = 0b1100001110000001
+    king_0_4_values  = 0b1000010
+    king_position_values = [(-0.1, king_n0_1_values), (-0.2, king_n0_2_values), (-0.3, king_n0_3_values), (-0.4, king_n0_4_values), (-0.5, king_n0_5_values), (0.1, king_0_1_values), (0.2, king_0_2_values), (0.4, king_0_4_values)]
+
+    # pawn_position_values = [
+    #     [0, 0, 0, 0, 0, 0, 0, 0],
+    #     [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+    #     [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+    #     [0.3, 0.3, 0.3, 0.4, 0.4, 0.3, 0.3, 0.3],
+    #     [0.2, 0.2, 0.2, 0.25, 0.25, 0.2, 0.2, 0.2],
+    #     [0.1, 0.1, 0.1, 0.15, 0.15, 0.1, 0.1, 0.1],
+    #     [0, 0, 0, 0, 0, 0, 0, 0],
+    #     [0, 0, 0, 0, 0, 0, 0, 0],
+    # ]
+
+    # knight_position_values = [
+    #     [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
+    #     [-0.2, -0.05, 0.0, 0.0, 0.0, 0.0, -0.05, -0.2],
+    #     [-0.1, 0.0, 0.05, 0.1, 0.1, 0.05, 0.0, -0.1],
+    #     [-0.1, 0.1, 0.1, 0.25, 0.25, 0.1, 0.1, -0.1],
+    #     [-0.1, 0.0, 0.1, 0.25, 0.25, 0.1, 0.0, -0.1],
+    #     [-0.1, 0.01, 0.05, 0.3, 0.3, 0.05, 0.01, -0.1],
+    #     [-0.2, -0.05, 0.0, 0.1, 0.1, 0.0, -0.05, -0.2],
+    #     [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
+    # ]
+
+    # king_position_values = [
+    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
+    #     [-0.2, -0.3, -0.3, -0.4, -0.4, -0.3, -0.3, -0.2],
+    #     [-0.1, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.1],
+    #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2],
+    #     [0.2, 0.4, 0.1, 0.0, 0.0, 0.1, 0.4, 0.2],
+    # ]
 
     def __init__(self, white: bool, copy=None):
         if copy:
@@ -140,22 +169,22 @@ class Player:
         return score
 
     def sum_piece_bonuses(self):
-        score = 0
-        for i in range(8):
-            for j in range(8):
-                num = 1 << (i * 8 + j)
-                if self.pawn & num:
-                    score += Player.piece_values['p'] + Player.pawn_position_values[(7-i) if self.white else i][j]
-                elif self.rook & num:
-                    score += Player.piece_values['r']
-                elif self.knight & num:
-                    score += Player.piece_values['h'] + Player.knight_position_values[(7-i) if self.white else i][j]
-                elif self.bishop & num:
-                    score += Player.piece_values['b']
-                elif self.queen & num:
-                    score += Player.piece_values['q']
-                elif self.king & num:
-                    score += Player.piece_values['k'] + Player.king_position_values[(7-i) if self.white else i][j]
+        score = self.sum_pieces()
+        for bonus, mask in Player.pawn_position_values:
+            if self.white:
+                score += bin(self.pawn & mask).count("1") * bonus
+            else:
+                score += bin(int('{:064b}'.format(self.pawn)[::-1], 2) & mask).count("1") * bonus
+        for bonus, mask in Player.knight_position_values:
+            if self.white:
+                score += bin(self.knight & mask).count("1") * bonus
+            else:
+                score += bin(int('{:064b}'.format(self.knight)[::-1], 2) & mask).count("1") * bonus
+        for bonus, mask in Player.king_position_values:
+            if self.white:
+                score += bin(self.king & mask).count("1") * bonus
+            else:
+                score += bin(int('{:064b}'.format(self.king)[::-1], 2) & mask).count("1") * bonus
         return score
 
     def naive_score(self, other):
