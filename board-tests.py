@@ -1,5 +1,4 @@
 import board
-import numpy as np
 
 def test_conversions():
   for ch in [chr(i) for i in range(97, 105)]:
@@ -20,9 +19,9 @@ if __name__ == "__main__":
   print()
   
   # game.player.pawn = np.uint64(1 << 40)
-  game.player.bishop = np.uint64(0)
-  game.player.knight = np.uint64(0)
-  game.player.queen = np.uint64(0)
+  game.player.bishop = 0
+  game.player.knight = 0
+  game.player.queen = 0
   game.pretty_print()
   # print(game.minimax(game.player, game.cpu, depth=3))
   # print(game.cpu.possible_moves(game.player))

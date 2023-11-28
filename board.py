@@ -1,4 +1,3 @@
-import numpy as np
 from typing import Optional, Tuple, List
 
 """
@@ -7,24 +6,24 @@ int: 64-bit integer corresponding to board state for a piece
 """
 
 
-king_lookup_table = {np.uint64(1 << i): i for i in range(64)}
-COL_A = np.uint64(0x0101010101010101)
-COL_B = np.uint64(0x0202020202020202)
-COL_C = np.uint64(0x0404040404040404)
-COL_D = np.uint64(0x0808080808080808)
-COL_E = np.uint64(0x1010101010101010)
-COL_F = np.uint64(0x2020202020202020)
-COL_G = np.uint64(0x4040404040404040)
-COL_H = np.uint64(0x8080808080808080)
+king_lookup_table = {(1 << i): i for i in range(64)}
+COL_A = 0x0101010101010101
+COL_B = 0x0202020202020202
+COL_C = 0x0404040404040404
+COL_D = 0x0808080808080808
+COL_E = 0x1010101010101010
+COL_F = 0x2020202020202020
+COL_G = 0x4040404040404040
+COL_H = 0x8080808080808080
 
-ROW_1 = np.uint64(0x00000000000000FF)
-ROW_2 = np.uint64(0x000000000000FF00)
-ROW_3 = np.uint64(0x0000000000FF0000)
-ROW_4 = np.uint64(0x00000000FF000000)
-ROW_5 = np.uint64(0x000000FF00000000)
-ROW_6 = np.uint64(0x0000FF0000000000)
-ROW_7 = np.uint64(0x00FF000000000000)
-ROW_8 = np.uint64(0xFF00000000000000)
+ROW_1 = 0x00000000000000FF
+ROW_2 = 0x000000000000FF00
+ROW_3 = 0x0000000000FF0000
+ROW_4 = 0x00000000FF000000
+ROW_5 = 0x000000FF00000000
+ROW_6 = 0x0000FF0000000000
+ROW_7 = 0x00FF000000000000
+ROW_8 = 0xFF00000000000000
 
 def position_row(position):
     for i, row in enumerate([ROW_1, ROW_2, ROW_3, ROW_4, ROW_5, ROW_6, ROW_7, ROW_8]):
@@ -41,7 +40,7 @@ def square_to_int(row: str, col: int) -> Optional[int]:
     Convert a row, col pair into integer representation
     """
     if len(row) == 1 and row >= "a" and row <= "h" and col >= 1 and col <= 8:
-        return np.uint64(1 << ((col - 1) * 8 + (ord(row) - ord("a"))))
+        return (1 << ((col - 1) * 8 + (ord(row) - ord("a"))))
 
 
 def square_to_leftshift_bits(row: str, col: int) -> Optional[int]:
@@ -56,12 +55,8 @@ def int_to_square(num: int) -> Optional[Tuple[str, int]]:
     """
     Convert an integer corresponding to a cell to the row, col pair
     """
-    if isinstance(num, np.uint64) and bin(num).count("1") == 1:
-        lshift = 0
-        for i in range(0, 64):
-            if num & np.uint64(1 << i):
-                lshift = i
-                break
+    if bin(num).count("1") == 1:
+        lshift = king_lookup_table[num]
         col = int(lshift / 8) + 1
         row = chr(lshift % 8 + ord("a"))
         return row, col
@@ -148,7 +143,7 @@ class Player:
         score = 0
         for i in range(8):
             for j in range(8):
-                num = np.uint64(1 << (i * 8 + j))
+                num = 1 << (i * 8 + j)
                 if self.pawn & num:
                     score += Player.piece_values['p'] + Player.pawn_position_values[(7-i) if self.white else i][j]
                 elif self.rook & num:
@@ -174,23 +169,23 @@ class Player:
         return other.sum_piece_bonuses() - self.sum_piece_bonuses()
 
     def reset(self, white: bool) -> None:
-        self.pawn = np.uint64(0)
+        self.pawn = 0
         if white:
             for i in range(8):
-                self.pawn = self.pawn | np.uint64(1 << (8 + i))
-            self.rook = np.uint64(1) | np.uint64(1 << 7)
-            self.knight = np.uint64(2) | np.uint64(1 << 6)
-            self.bishop = np.uint64(4) | np.uint64(1 << 5)
-            self.queen = np.uint64(8)
-            self.king = np.uint64(16)
+                self.pawn = self.pawn | (1 << (8 + i))
+            self.rook = (1) | (1 << 7)
+            self.knight = (2) | (1 << 6)
+            self.bishop = (4) | (1 << 5)
+            self.queen = (8)
+            self.king = (16)
         else:
             for i in range(8):
-                self.pawn = self.pawn | np.uint64(1 << (48 + i))
-            self.rook = np.uint64(1 << 56) | np.uint64(1 << 63)
-            self.knight = np.uint64(1 << 57) | np.uint64(1 << 62)
-            self.bishop = np.uint64(1 << 58) | np.uint(1 << 61)
-            self.queen = np.uint(1 << 59)
-            self.king = np.uint(1 << 60)
+                self.pawn = self.pawn | (1 << (48 + i))
+            self.rook = (1 << 56) | (1 << 63)
+            self.knight = (1 << 57) | (1 << 62)
+            self.bishop = (1 << 58) | (1 << 61)
+            self.queen = (1 << 59)
+            self.king = (1 << 60)
 
     def piece_at_int(self, num: int) -> Optional[str]:
         """
@@ -199,7 +194,7 @@ class Player:
         """
         if num < 0 or num >= 64:
             return None
-        num = np.uint64(1 << num)
+        num = (1 << num)
         if self.pawn & num:
             return Player.pawn
         elif self.rook & num:
@@ -219,12 +214,12 @@ class Player:
     def piece_exists(self, num):
         if num < 0 or num >= 64:
             return False
-        return True if (self.union_pieces() & np.uint64(1 << num)) else False
+        return True if (self.union_pieces() & (1 << num)) else False
 
     def remove_piece_at_int(self, num: int) -> None:
         if num < 0 or num >= 64:
             return None
-        num = np.uint64(1 << num)
+        num = (1 << num)
         if self.pawn & num:
             self.pawn = self.pawn ^ num
         elif self.rook & num:
@@ -240,28 +235,28 @@ class Player:
 
     def get_pawn_attacks(self, position):
         if self.white:
-            return ((position << np.uint64(7)) & ~COL_H) | ((position << np.uint64(9)) & ~COL_A)
+            return ((position << (7)) & ~COL_H) | ((position << (9)) & ~COL_A)
         else:
-            return ((position >> np.uint64(7)) & ~COL_A) | ((position >> np.uint64(9)) & ~COL_H)
+            return ((position >> (7)) & ~COL_A) | ((position >> (9)) & ~COL_H)
 
     def get_knight_attacks(position):
-        l1 = (position >> np.uint64(1)) & ~COL_H
-        l2 = (position >> np.uint64(2)) & ~(COL_G | COL_H)
-        r1 = (position << np.uint64(1)) & ~COL_A
-        r2 = (position << np.uint64(2)) & ~(COL_A | COL_B)
+        l1 = (position >> (1)) & ~COL_H
+        l2 = (position >> (2)) & ~(COL_G | COL_H)
+        r1 = (position << (1)) & ~COL_A
+        r2 = (position << (2)) & ~(COL_A | COL_B)
         h1 = l1 | r1
         h2 = l2 | r2
-        return (h1 << np.uint64(16)) | (h1 >> np.uint64(16)) | (h2 << np.uint64(8)) | (h2 >> np.uint64(8))
+        return (h1 << (16)) | (h1 >> (16)) | (h2 << (8)) | (h2 >> (8))
 
     def get_king_attacks(position):
-        attacks = ((position << np.uint64(1)) & ~COL_H) | \
-                  ((position >> np.uint64(1)) & ~COL_A) | \
-                  ((position << np.uint64(8)) & ~ROW_1)  | \
-                  ((position >> np.uint64(8)) & ~ROW_8)  | \
-                  ((position << np.uint64(7)) & ~(ROW_1 | COL_A)) | \
-                  ((position >> np.uint64(7)) & ~(ROW_8 | COL_H)) | \
-                  ((position << np.uint64(9)) & ~(ROW_1 | COL_H)) | \
-                  ((position >> np.uint64(9)) & ~(ROW_8 | COL_A)) 
+        attacks = ((position << (1)) & ~COL_H) | \
+                  ((position >> (1)) & ~COL_A) | \
+                  ((position << (8)) & ~ROW_1)  | \
+                  ((position >> (8)) & ~ROW_8)  | \
+                  ((position << (7)) & ~(ROW_1 | COL_A)) | \
+                  ((position >> (7)) & ~(ROW_8 | COL_H)) | \
+                  ((position << (9)) & ~(ROW_1 | COL_H)) | \
+                  ((position >> (9)) & ~(ROW_8 | COL_A)) 
         return attacks
 
     # does NOT check for en passant!!
@@ -271,7 +266,7 @@ class Player:
                 self.piece_exists(square) or other.piece_exists(square)
             )
 
-        position = np.uint64(1 << square)
+        position = (1 << square)
         if other.pawn & self.get_pawn_attacks(position): return True
         elif other.knight & Player.get_knight_attacks(position): return True
         elif other.king & Player.get_king_attacks(position): return True
@@ -388,7 +383,7 @@ class Player:
 
         res = []
         for i in range(0, 64):
-            cell = np.uint64(1 << i)
+            cell = (1 << i)
             col = i % 8
             row = int(i / 8)
             if self.pawn & cell:
@@ -592,19 +587,19 @@ class Player:
         other_copy = Player(other.white, other)
 
         if move[0] == Player.pawn:
-            copy.pawn = copy.pawn ^ np.uint64(1 << move[1])
+            copy.pawn = copy.pawn ^ (1 << move[1])
             # promoting a pawn
             if len(move) == 4:
                 if move[3] == Player.bishop:
-                    copy.bishop = copy.bishop | np.uint64(1 << move[2])
+                    copy.bishop = copy.bishop | (1 << move[2])
                 elif move[3] == Player.rook:
-                    copy.rook = copy.rook | np.uint64(1 << move[2])
+                    copy.rook = copy.rook | (1 << move[2])
                 elif move[3] == Player.knight:
-                    copy.knight = copy.knight | np.uint64(1 << move[2])
+                    copy.knight = copy.knight | (1 << move[2])
                 elif move[3] == Player.queen:
-                    copy.queen = copy.queen | np.uint64(1 << move[2])
+                    copy.queen = copy.queen | (1 << move[2])
             else:
-                copy.pawn = copy.pawn | np.uint64(1 << move[2])
+                copy.pawn = copy.pawn | (1 << move[2])
 
             # en passant
             if ((move[1] % 8) - (move[2] % 8)) == 1 and other_copy.piece_exists(
@@ -617,34 +612,34 @@ class Player:
                 other_copy.remove_piece_at_int(move[1] + 1)
 
         elif move[0] == Player.rook:
-            copy.rook = (copy.rook ^ np.uint64(1 << move[1])) | np.uint64(1 << move[2])
+            copy.rook = (copy.rook ^ (1 << move[1])) | (1 << move[2])
         elif move[0] == Player.knight:
-            copy.knight = (copy.knight ^ np.uint64(1 << move[1])) | np.uint64(
+            copy.knight = (copy.knight ^ (1 << move[1])) | (
                 1 << move[2]
             )
         elif move[0] == Player.bishop:
-            copy.bishop = (copy.bishop ^ np.uint64(1 << move[1])) | np.uint64(
+            copy.bishop = (copy.bishop ^ (1 << move[1])) | (
                 1 << move[2]
             )
         elif move[0] == Player.queen:
-            copy.queen = (copy.queen ^ np.uint64(1 << move[1])) | np.uint64(
+            copy.queen = (copy.queen ^ (1 << move[1])) | (
                 1 << move[2]
             )
         elif move[0] == Player.king:
-            copy.king = copy.king ^ np.uint64(1 << move[1])
+            copy.king = copy.king ^ (1 << move[1])
             # castling left
             if (move[1] % 8) - (move[2] % 8) == 2:
                 if copy.white:
-                    copy.rook = (copy.rook ^ np.uint64(1)) | np.uint64(1 << 3)
+                    copy.rook = (copy.rook ^ (1)) | (1 << 3)
                 else:
-                    copy.rook = (copy.rook ^ np.uint64(1 << 54)) | np.uint64(1 << 57)
+                    copy.rook = (copy.rook ^ (1 << 54)) | (1 << 57)
             # castling right
             elif (move[2] % 8) - (move[1] % 8) == 2:
                 if copy.white:
-                    copy.rook = (copy.rook ^ np.uint64(1 << 7)) | np.uint64(1 << 5)
+                    copy.rook = (copy.rook ^ (1 << 7)) | (1 << 5)
                 else:
-                    copy.rook = (copy.rook ^ np.uint64(1 << 63)) | np.uint64(1 << 61)
-            copy.king = copy.king | np.uint64(1 << move[2])
+                    copy.rook = (copy.rook ^ (1 << 63)) | (1 << 61)
+            copy.king = copy.king | (1 << move[2])
 
         other_copy.remove_piece_at_int(move[2])
 
