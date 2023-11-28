@@ -474,7 +474,7 @@ class Player:
                 piece = Player.rook if self.rook & cell else Player.queen
                 # move left
                 j = i - 1
-                while j >= i % 8:
+                while j >= (i // 8) * 8:
                     if can_move(j):
                         res.append((piece, i, j))
                     else:
@@ -661,7 +661,7 @@ class Player:
                 if copy.white:
                     copy.rook = (copy.rook ^ (1)) | (1 << 3)
                 else:
-                    copy.rook = (copy.rook ^ (1 << 54)) | (1 << 57)
+                    copy.rook = (copy.rook ^ (1 << 56)) | (1 << 59)
             # castling right
             elif (move[2] % 8) - (move[1] % 8) == 2:
                 if copy.white:

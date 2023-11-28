@@ -30,3 +30,8 @@ if __name__ == "__main__":
   game.player, game.cpu = game.player.make_move((board.Player.king, 4, 2), game.cpu)
   print(game.player.can_castle_left, game.player.can_castle_right)
   game.pretty_print()
+  game.cpu.knight = 0
+  game.cpu.bishop = 0
+  game.cpu.queen = 0
+  game.cpu, game.player = game.cpu.make_move((board.Player.king, 60, 58), game.player)
+  game.pretty_print()
