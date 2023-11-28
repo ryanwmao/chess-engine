@@ -239,7 +239,6 @@ class Player:
             self.king = self.king ^ num
 
     def get_pawn_attacks(self, position):
-        print(position)
         if self.white:
             return ((position << np.uint64(7)) & ~COL_H) | ((position << np.uint64(9)) & ~COL_A)
         else:
