@@ -706,6 +706,8 @@ class Game:
         best_move_val = float("-inf") if player.white else float("inf")
         for move in player.possible_moves(other):
             player_moved, other_moved = player.make_move(move, other)
+            if player_moved.king == 0:
+                continue
             if player_moved.is_king_under_attack(other_moved):
                 continue
             if depth > 0:
@@ -735,6 +737,8 @@ class Game:
         best_move_val = float("-inf") if player.white else float("inf")
         for move in player.possible_moves(other):
             player_moved, other_moved = player.make_move(move, other)
+            if player_moved.king == 0:
+                continue
             if player_moved.is_king_under_attack(other_moved):
                 continue
             if depth > 0:
