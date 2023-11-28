@@ -279,7 +279,7 @@ class Player:
             row, _ = position_row(position)
             col, _ = position_col(position)
             for c in range(col+1, 8):
-                i = row * 8 + col
+                i = row * 8 + c
                 if self.piece_exists(i):
                     break
                 if other.piece_exists(i):
@@ -289,7 +289,7 @@ class Player:
                     else:
                         break
             for c in range(col-1, -1, -1):
-                i = row * 8 + col
+                i = row * 8 + c
                 if self.piece_exists(i):
                     break
                 if other.piece_exists(i):
@@ -298,8 +298,81 @@ class Player:
                         return True
                     else:
                         break
-            # TODO: ROOK ROW CHECK
-            # TODO: BISHOP
+            for r in range(row+1, 8):
+                i = r * 8 + col
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'r' or p == 'q':
+                        return True
+                    else:
+                        break
+            for r in range(row-1, -1, -1):
+                i = r * 8 + col
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'r' or p == 'q':
+                        return True
+                    else:
+                        break
+            
+            r, c = row, col
+            while r > -1 and c > -1:
+                r -= 1
+                c -= 1
+                i = r * 8 + c
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'b' or p == 'q':
+                        return True
+                    else:
+                        break
+            r, c = row, col
+            while r > -1 and c < 8:
+                r -= 1
+                c += 1
+                i = r * 8 + c
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'b' or p == 'q':
+                        return True
+                    else:
+                        break
+            
+            r, c = row, col
+            while r < 8 and c > -1:
+                r += 1
+                c -= 1
+                i = r * 8 + c
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'b' or p == 'q':
+                        return True
+                    else:
+                        break
+            
+            r, c = row, col
+            while r < 8 and c < 8:
+                r += 1
+                c += 1
+                i = r * 8 + c
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'b' or p == 'q':
+                        return True
+                    else:
+                        break
 
     def is_king_under_attack(self, other):
         sq = king_lookup_table[self.king]
