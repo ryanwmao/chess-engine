@@ -8,44 +8,33 @@ int: 64-bit integer corresponding to board state for a piece
 
 
 king_lookup_table = {np.uint64(1 << i): i for i in range(64)}
-A_FILE = 0x0101010101010101
-B_FILE = 0x0202020202020202
-C_FILE = 0x0404040404040404
-D_FILE = 0x0808080808080808
-E_FILE = 0x1010101010101010
-F_FILE = 0x2020202020202020
-G_FILE = 0x4040404040404040
-H_FILE = 0x8080808080808080
+COL_A = 0x0101010101010101
+COL_B = 0x0202020202020202
+COL_C = 0x0404040404040404
+COL_D = 0x0808080808080808
+COL_E = 0x1010101010101010
+COL_F = 0x2020202020202020
+COL_G = 0x4040404040404040
+COL_H = 0x8080808080808080
 
-FIRST_ROW   = 0x00000000000000FF
-SECOND_ROW  = 0x000000000000FF00
-THIRD_ROW   = 0x0000000000FF0000
-FOURTH_ROW  = 0x00000000FF000000
-FIFTH_ROW   = 0x000000FF00000000
-SIXTH_ROW   = 0x0000FF0000000000
-SEVENTH_ROW = 0x00FF000000000000
-EIGHTH_ROW  = 0xFF00000000000000
+ROW_1 = 0x00000000000000FF
+ROW_2 = 0x000000000000FF00
+ROW_3 = 0x0000000000FF0000
+ROW_4 = 0x00000000FF000000
+ROW_5 = 0x000000FF00000000
+ROW_6 = 0x0000FF0000000000
+ROW_7 = 0x00FF000000000000
+ROW_8 = 0xFF00000000000000
 
+def position_row(position):
+    for i, row in enumerate([ROW_1, ROW_2, ROW_3, ROW_4, ROW_5, ROW_6, ROW_7, ROW_8]):
+        if position & row:
+            return i, row
 
-def get_pawn_attacks(position, color):
-    if color == 'white':
-        return ((position << 7) & ~H_FILE) | ((position << 9) & ~A_FILE)
-    else:
-        return ((position >> 7) & ~A_FILE) | ((position >> 9) & ~H_FILE)
-
-def get_knight_attacks(position):
-    l1 = (position >> 1) & ~H_FILE
-    l2 = (position >> 2) & ~(G_FILE | H_FILE)
-    r1 = (position << 1) & ~A_FILE
-    r2 = (position << 2) & ~(A_FILE | B_FILE)
-    h1 = l1 | r1
-    h2 = l2 | r2
-    return (h1 << 16) | (h1 >> 16) | (h2 << 8) | (h2 >> 8)
-
-def get_king_attacks(position):
-    attacks = (position << 1) | (position >> 1) | (position << 8) | (position >> 8) | (position << 7) | (position >> 7) | (position << 9) | (position >> 9)
-    return attacks & ~(position)
-
+def position_col(position):
+    for i, col in enumerate([COL_A, COL_B, COL_C, COL_D, COL_E, COL_F, COL_G, COL_H]):
+        if position & col:
+            return i, col
 
 def square_to_int(row: str, col: int) -> Optional[int]:
     """
@@ -249,88 +238,68 @@ class Player:
         elif self.king & num:
             self.king = self.king ^ num
 
+    def get_pawn_attacks(self, position):
+        if self.white:
+            return ((position << 7) & ~COL_H) | ((position << 9) & ~COL_A)
+        else:
+            return ((position >> 7) & ~COL_A) | ((position >> 9) & ~COL_H)
+
+    def get_knight_attacks(position):
+        l1 = (position >> 1) & ~COL_H
+        l2 = (position >> 2) & ~(COL_G | COL_H)
+        r1 = (position << 1) & ~COL_A
+        r2 = (position << 2) & ~(COL_A | COL_B)
+        h1 = l1 | r1
+        h2 = l2 | r2
+        return (h1 << 16) | (h1 >> 16) | (h2 << 8) | (h2 >> 8)
+
+    def get_king_attacks(position):
+        attacks = ((position << 1) & ~COL_H) | 
+                  ((position >> 1) & ~COL_A) | 
+                  ((position << 8) & ~ROW_1)  | 
+                  ((position >> 8) & ~ROW_8)  | 
+                  ((position << 7) & ~(ROW_1 | COL_A)) | 
+                  ((position >> 7) & ~(ROW_8 | COL_H)) | 
+                  ((position << 9) & ~(ROW_1 | COL_H)) | 
+                  ((position >> 9) & ~(ROW_8 | COL_A)) 
+        return attacks
+
+    # does NOT check for en passant!!
     def is_square_under_attack(self, square: int, other):
         def contains_piece(square):
             return (
                 self.piece_exists(square) or other.piece_exists(square)
             )
 
-        for i in range(64):
-            p = other.piece_at_int(i)
-            if p:
-                col = i % 8
-                row = int(i / 8)
-
-                if p == Player.pawn:
-                    sign = -1 if self.white else 1
-                    attack_left = i + 7 * sign
-                    attack_right = i + 9 * sign
-                    if (
-                        square in [attack_left, attack_right]
-                        and abs((square % 8) - col) == 1
-                    ):
+        position = np.uint64(1 << square)
+        if other.pawn & this.get_pawn_attacks(position): return True
+        elif other.knight & this.get_knight_attacks(position): return True
+        elif other.king & this.get_king_attacks(position): return True
+        else:
+            row, _ = position_row(position)
+            col, _ = position_col(position)
+            for c in range(col+1, 8):
+                i = row * 8 + col
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'r' or p == 'q':
                         return True
-
-                elif (
-                    p == Player.rook
-                    or p == Player.queen
-                ):
-                    if square % 8 == col or square // 8 == row:
-                        if row == square // 8:
-                            min_col = min(col, square % 8)
-                            max_col = max(col, square % 8)
-                            for c in range(min_col + 1, max_col):
-                                if contains_piece(row * 8 + c):
-                                    break
-                            else:
-                                return True
-
-                        if square % 8 == col:
-                            min_row = min(row, square // 8) + 1
-                            max_row = max(row, square // 8)
-                            for j in range(min_row, max_row):
-                                if contains_piece(j * 8 + col):
-                                    break
-                            else:
-                                return True
-
-                elif p == Player.knight:
-                    knight_moves = [-17, -15, -10, -6, 6, 10, 15, 17]
-                    for move in knight_moves:
-                        if 0 <= i + move < 64:
-                            if abs(col - (i + move) % 8) in [1, 2]:
-                                if i + move == square:
-                                    return True
-
-                elif (
-                    p == Player.bishop
-                    or p == Player.queen
-                ):
-                    if abs((col) - (square % 8)) == abs((row) - (square // 8)):
-                        min_col = min(col, square % 8) + 1
-                        max_col = max(col, square % 8)
-                        min_row = min(row, square // 8) + 1
-                        max_row = max(row, square // 8)
-                        for c, r in zip(
-                            range(min_col, max_col), range(min_row, max_row)
-                        ):
-                            if contains_piece(r * 8 + c):
-                                break
-                        else:
-                            return True
-
-                elif p == Player.king:
-                    king_moves = [-9, -8, -7, -1, 1, 7, 8, 9]
-                    for move in king_moves:
-                        if 0 <= i + move < 64:
-                            if (
-                                abs(col - (i + move) % 8) <= 1
-                                and abs(row - (i + move) // 8) <= 1
-                            ):
-                                if i + move == square:
-                                    return True
-
-        return False
+                    else:
+                        break
+            for c in range(col-1, -1, -1):
+                i = row * 8 + col
+                if self.piece_exists(i):
+                    break
+                if other.piece_exists(i):
+                    p = other.piece_at_int(i)
+                    if p == 'r' or p == 'q':
+                        return True
+                    else:
+                        break
+            # TODO: ROOK ROW CHECK
+            # TODO: BISHOP
 
     def is_king_under_attack(self, other):
         sq = king_lookup_table[self.king]
