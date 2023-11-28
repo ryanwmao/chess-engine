@@ -8,23 +8,23 @@ int: 64-bit integer corresponding to board state for a piece
 
 
 king_lookup_table = {np.uint64(1 << i): i for i in range(64)}
-COL_A = 0x0101010101010101
-COL_B = 0x0202020202020202
-COL_C = 0x0404040404040404
-COL_D = 0x0808080808080808
-COL_E = 0x1010101010101010
-COL_F = 0x2020202020202020
-COL_G = 0x4040404040404040
-COL_H = 0x8080808080808080
+COL_A = np.uint64(0x0101010101010101)
+COL_B = np.uint64(0x0202020202020202)
+COL_C = np.uint64(0x0404040404040404)
+COL_D = np.uint64(0x0808080808080808)
+COL_E = np.uint64(0x1010101010101010)
+COL_F = np.uint64(0x2020202020202020)
+COL_G = np.uint64(0x4040404040404040)
+COL_H = np.uint64(0x8080808080808080)
 
-ROW_1 = 0x00000000000000FF
-ROW_2 = 0x000000000000FF00
-ROW_3 = 0x0000000000FF0000
-ROW_4 = 0x00000000FF000000
-ROW_5 = 0x000000FF00000000
-ROW_6 = 0x0000FF0000000000
-ROW_7 = 0x00FF000000000000
-ROW_8 = 0xFF00000000000000
+ROW_1 = np.uint64(0x00000000000000FF)
+ROW_2 = np.uint64(0x000000000000FF00)
+ROW_3 = np.uint64(0x0000000000FF0000)
+ROW_4 = np.uint64(0x00000000FF000000)
+ROW_5 = np.uint64(0x000000FF00000000)
+ROW_6 = np.uint64(0x0000FF0000000000)
+ROW_7 = np.uint64(0x00FF000000000000)
+ROW_8 = np.uint64(0xFF00000000000000)
 
 def position_row(position):
     for i, row in enumerate([ROW_1, ROW_2, ROW_3, ROW_4, ROW_5, ROW_6, ROW_7, ROW_8]):
@@ -239,29 +239,30 @@ class Player:
             self.king = self.king ^ num
 
     def get_pawn_attacks(self, position):
+        print(position)
         if self.white:
-            return ((position << 7) & ~COL_H) | ((position << 9) & ~COL_A)
+            return ((position << np.uint64(7)) & ~COL_H) | ((position << np.uint64(9)) & ~COL_A)
         else:
-            return ((position >> 7) & ~COL_A) | ((position >> 9) & ~COL_H)
+            return ((position >> np.uint64(7)) & ~COL_A) | ((position >> np.uint64(9)) & ~COL_H)
 
     def get_knight_attacks(position):
-        l1 = (position >> 1) & ~COL_H
-        l2 = (position >> 2) & ~(COL_G | COL_H)
-        r1 = (position << 1) & ~COL_A
-        r2 = (position << 2) & ~(COL_A | COL_B)
+        l1 = (position >> np.uint64(1)) & ~COL_H
+        l2 = (position >> np.uint64(2)) & ~(COL_G | COL_H)
+        r1 = (position << np.uint64(1)) & ~COL_A
+        r2 = (position << np.uint64(2)) & ~(COL_A | COL_B)
         h1 = l1 | r1
         h2 = l2 | r2
-        return (h1 << 16) | (h1 >> 16) | (h2 << 8) | (h2 >> 8)
+        return (h1 << np.uint64(16)) | (h1 >> np.uint64(16)) | (h2 << np.uint64(8)) | (h2 >> np.uint64(8))
 
     def get_king_attacks(position):
-        attacks = ((position << 1) & ~COL_H) | 
-                  ((position >> 1) & ~COL_A) | 
-                  ((position << 8) & ~ROW_1)  | 
-                  ((position >> 8) & ~ROW_8)  | 
-                  ((position << 7) & ~(ROW_1 | COL_A)) | 
-                  ((position >> 7) & ~(ROW_8 | COL_H)) | 
-                  ((position << 9) & ~(ROW_1 | COL_H)) | 
-                  ((position >> 9) & ~(ROW_8 | COL_A)) 
+        attacks = ((position << np.uint64(1)) & ~COL_H) | \
+                  ((position >> np.uint64(1)) & ~COL_A) | \
+                  ((position << np.uint64(8)) & ~ROW_1)  | \
+                  ((position >> np.uint64(8)) & ~ROW_8)  | \
+                  ((position << np.uint64(7)) & ~(ROW_1 | COL_A)) | \
+                  ((position >> np.uint64(7)) & ~(ROW_8 | COL_H)) | \
+                  ((position << np.uint64(9)) & ~(ROW_1 | COL_H)) | \
+                  ((position >> np.uint64(9)) & ~(ROW_8 | COL_A)) 
         return attacks
 
     # does NOT check for en passant!!
@@ -272,9 +273,9 @@ class Player:
             )
 
         position = np.uint64(1 << square)
-        if other.pawn & this.get_pawn_attacks(position): return True
-        elif other.knight & this.get_knight_attacks(position): return True
-        elif other.king & this.get_king_attacks(position): return True
+        if other.pawn & self.get_pawn_attacks(position): return True
+        elif other.knight & Player.get_knight_attacks(position): return True
+        elif other.king & Player.get_king_attacks(position): return True
         else:
             row, _ = position_row(position)
             col, _ = position_col(position)
