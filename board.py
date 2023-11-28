@@ -76,10 +76,10 @@ class Player:
     pawn_0_4_values = 0b1111111100011 << 35
     pawn_0_3_values = 0b11100111 << 32
     pawn_0_25_values = 0b11 << 27
-    pawn_0_2_values = 0b11100111 << 24
+    pawn_0_16_values = 0b11100111 << 24
     pawn_0_15_values = 0b11 << 19
     pawn_0_1_values = 0b11100111 << 16
-    pawn_position_values = [(0.5, pawn_0_5_values), (0.4, pawn_0_4_values), (0.3, pawn_0_3_values), (0.25, pawn_0_25_values), (0.2, pawn_0_2_values), (0.15, pawn_0_15_values), (0.1, pawn_0_1_values)]
+    pawn_position_values = [(0.5, pawn_0_5_values), (0.4, pawn_0_4_values), (0.3, pawn_0_3_values), (0.25, pawn_0_25_values), (0.16, pawn_0_16_values), (0.15, pawn_0_15_values), (0.1, pawn_0_1_values)]
 
     knight_n0_2_values  = 0b1000000110000001000000000000000000000000000000001000000110000001
     knight_n0_1_values  = 0b0100001000000000100000011000000110000001100000010000000001000010
