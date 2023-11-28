@@ -474,7 +474,7 @@ class Player:
                 piece = Player.rook if self.rook & cell else Player.queen
                 # move left
                 j = i - 1
-                while j >= 0:
+                while j >= i % 8:
                     if can_move(j):
                         res.append((piece, i, j))
                     else:
@@ -631,13 +631,13 @@ class Player:
                 copy.pawn = copy.pawn | (1 << move[2])
 
             # en passant
-            if ((move[1] % 8) - (move[2] % 8)) == 1 and other_copy.piece_exists(
+            if ((move[1] % 8) - (move[2] % 8)) == 1 and not other_copy.piece_exists(
                 move[2]
-            ) is None:
+            ):
                 other_copy.remove_piece_at_int(move[1] - 1)
-            elif ((move[2] % 8) - (move[1] % 8)) == 1 and other_copy.piece_exists(
+            elif ((move[2] % 8) - (move[1] % 8)) == 1 and not other_copy.piece_exists(
                 move[2]
-            ) is None:
+            ):
                 other_copy.remove_piece_at_int(move[1] + 1)
 
         elif move[0] == Player.rook:
