@@ -80,6 +80,7 @@ class Player:
     pawn_0_1_values = 0b11 << 19
     pawn_0_05_values = 0b11100111 << 16
     pawn_position_values = [(0.6, pawn_0_6_values), (0.5, pawn_0_5_values), (0.35, pawn_0_35_values), (0.45, pawn_0_45_values), (0.16, pawn_0_16_values), (0.1, pawn_0_1_values), (0.05, pawn_0_05_values)]
+    pawn_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in pawn_position_values]
 
     knight_n0_2_values  = 0b1000000110000001000000000000000000000000000000001000000110000001
     knight_n0_1_values  = 0b0100001000000000100000011000000110000001100000010000000001000010
@@ -89,6 +90,7 @@ class Player:
     knight_0_25_values  = 0b0000000000000000000000000001100000011000000000000000000000000000
     knight_0_3_values   = 0b11 << 19
     knight_position_values = [(-0.2, knight_n0_2_values), (-0.1, knight_n0_1_values), (-0.05, knight_n0_05_values), (0.05, knight_0_05_values), (0.1, knight_0_1_values), (0.25, knight_0_25_values), (0.3, knight_0_3_values)]
+    knight_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in knight_position_values]
 
     king_n0_1_values = 0b10000001 << 16
     king_n0_2_values = 0b10000001011111100000000000000000
@@ -99,6 +101,7 @@ class Player:
     king_0_2_values  = 0b1100001110000001
     king_0_8_values  = 0b1000010
     king_position_values = [(-0.1, king_n0_1_values), (-0.2, king_n0_2_values), (-0.3, king_n0_3_values), (-0.4, king_n0_4_values), (-0.5, king_n0_5_values), (0.1, king_0_1_values), (0.2, king_0_2_values), (0.8, king_0_8_values)]
+    king_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in king_position_values]
 
     # pawn_position_values = [
     #     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -170,21 +173,21 @@ class Player:
 
     def sum_piece_bonuses(self):
         score = self.sum_pieces()
-        for bonus, mask in Player.pawn_position_values:
-            if self.white:
+        if self.white:
+            for bonus, mask in Player.pawn_position_values:
                 score += bin(self.pawn & mask).count("1") * bonus
-            else:
-                score += bin(int('{:064b}'.format(self.pawn)[::-1], 2) & mask).count("1") * bonus
-        for bonus, mask in Player.knight_position_values:
-            if self.white:
+            for bonus, mask in Player.knight_position_values:
                 score += bin(self.knight & mask).count("1") * bonus
-            else:
-                score += bin(int('{:064b}'.format(self.knight)[::-1], 2) & mask).count("1") * bonus
-        for bonus, mask in Player.king_position_values:
-            if self.white:
+            for bonus, mask in Player.king_position_values:
                 score += bin(self.king & mask).count("1") * bonus
-            else:
-                score += bin(int('{:064b}'.format(self.king)[::-1], 2) & mask).count("1") * bonus
+        else:
+            for bonus, mask in Player.pawn_position_values_black:
+                score += bin(self.pawn & mask).count("1") * bonus
+            for bonus, mask in Player.knight_position_values_black:
+                score += bin(self.knight & mask).count("1") * bonus
+            for bonus, mask in Player.king_position_values_black:
+                score += bin(self.king & mask).count("1") * bonus
+
         return score
 
     def naive_score(self, other):
