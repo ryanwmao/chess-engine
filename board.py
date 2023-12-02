@@ -109,18 +109,24 @@ class Player:
     ]
 
 
-    king_safety_values = 0b110000001100000011000000110000000000000000000000
-    king_early_central_values = 0b000000000000000000000000000000000011000000110000
-    king_endgame_values = 0b000000000000000000111100000111000001110000011100
+    king_safety_values = 0b0000000000000000000000000000000000000000000000000000000011000111
+    king_early_central_values = 0b0000000000000000000000000000000000000000000000001111111100000000
+    king_endgame_values = 0b1111111111111111111111111111111111111111111111110000000000000000
 
     king_position_values = [
         (0.5, king_safety_values), 
-        (0.3, king_early_central_values), 
-        (0.2, king_endgame_values)
+        (-0.2, king_early_central_values), 
+        (-0.3, king_endgame_values)
     ]
 
+    king_safety_values_black = 0b11000111
+    king_early_central_values_black = 0b0000000011111111
+    king_endgame_values_black = 0b0000000000000000111111111111111111111111111111111111111111111111
+
     king_position_values_black = [
-        (i, int('{:064b}'.format(val)[::-1], 2)) for (i, val) in king_position_values
+        (0.5, king_safety_values_black), 
+        (-.2, king_early_central_values_black), 
+        (-.3, king_endgame_values_black)
     ]
 
     def __init__(self, white: bool, copy=None):
