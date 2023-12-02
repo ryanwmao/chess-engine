@@ -119,8 +119,8 @@ class Player:
         (-0.3, king_endgame_values)
     ]
 
-    king_safety_values_black = 0b11000111
-    king_early_central_values_black = 0b0000000011111111
+    king_safety_values_black = 0b1100011100000000000000000000000000000000000000000000000000000000
+    king_early_central_values_black = 0b0000000011111111000000000000000000000000000000000000000000000000
     king_endgame_values_black = 0b0000000000000000111111111111111111111111111111111111111111111111
 
     king_position_values_black = [

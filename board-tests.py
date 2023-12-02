@@ -46,7 +46,11 @@ if __name__ == "__main__":
   for i in range(64):
     game.cpu.king = 1 << i
     val = game.cpu.sum_piece_bonuses()
-    if val != 1000:
+    if val >= 1000:
       print(i)
       print(game.cpu.sum_piece_bonuses())
       game.pretty_print()
+
+  # game.cpu.king = 1
+  # val = game.cpu.sum_piece_bonuses()
+  # print(val)
