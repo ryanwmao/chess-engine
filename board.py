@@ -72,69 +72,56 @@ class Player:
     piece_values = {"p": 1, "r": 5, "h": 3, "b": 3, "q": 9, "k": 1000}
 
 
-    pawn_0_6_values = 0b11111111 << 48
-    pawn_0_5_values = 0b1111111100011 << 35
-    pawn_0_35_values = 0b11100111 << 32
-    pawn_0_45_values = 0b11 << 27
-    pawn_0_16_values = 0b11100111 << 24
-    pawn_0_1_values = 0b11 << 19
-    pawn_0_05_values = 0b11100111 << 16
-    pawn_position_values = [(0.6, pawn_0_6_values), (0.5, pawn_0_5_values), (0.35, pawn_0_35_values), (0.45, pawn_0_45_values), (0.16, pawn_0_16_values), (0.1, pawn_0_1_values), (0.05, pawn_0_05_values)]
-    pawn_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in pawn_position_values]
+    pawn_early_1_values = 0b000000001111111100000000 << 40
+    pawn_early_2_values = 0b000000000011111000000000 << 32
+    pawn_middle_1_values = 0b000011110000111100000000 << 24
+    pawn_middle_2_values = 0b000000111100001111000000 << 16
+    pawn_late_1_values = 0b001100110011001100110011 << 8
+    pawn_late_2_values = 0b1111111111111111
 
-    knight_n0_2_values  = 0b1000000110000001000000000000000000000000000000001000000110000001
-    knight_n0_1_values  = 0b0100001000000000100000011000000110000001100000010000000001000010
-    knight_n0_05_values = 0b0011110001000010000000000000000000000000000000000100001000111100
-    knight_0_05_values  = 0b0000000000000000001001000000000000000000001001000001100000000000
-    knight_0_1_values   = 0b0000000000000000000110000110011000100100000000000000000000000000
-    knight_0_25_values  = 0b0000000000000000000000000001100000011000000000000000000000000000
-    knight_0_3_values   = 0b11 << 19
-    knight_position_values = [(-0.2, knight_n0_2_values), (-0.1, knight_n0_1_values), (-0.05, knight_n0_05_values), (0.05, knight_0_05_values), (0.1, knight_0_1_values), (0.25, knight_0_25_values), (0.3, knight_0_3_values)]
-    knight_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in knight_position_values]
+    pawn_position_values = [
+        (0.5, pawn_early_1_values), 
+        (0.4, pawn_early_2_values), 
+        (0.35, pawn_middle_1_values), 
+        (0.3, pawn_middle_2_values), 
+        (0.25, pawn_late_1_values), 
+        (0.2, pawn_late_2_values)
+    ]
 
-    king_n0_1_values = 0b10000001 << 16
-    king_n0_2_values = 0b10000001011111100000000000000000
-    king_n0_3_values = 0b1000000110000001100000011000000101100110000000000000000000000000
-    king_n0_4_values = 0b0110011001100110011001100110011000011000000000000000000000000000
-    king_n0_5_values = 0b0001100000011000000110000001100000000000000000000000000000000000
-    king_0_1_values  = 0b100100
-    king_0_2_values  = 0b1100001110000001
-    king_0_8_values  = 0b1000010
-    king_position_values = [(-0.1, king_n0_1_values), (-0.2, king_n0_2_values), (-0.3, king_n0_3_values), (-0.4, king_n0_4_values), (-0.5, king_n0_5_values), (0.1, king_0_1_values), (0.2, king_0_2_values), (0.8, king_0_8_values)]
-    king_position_values_black = [(i, int('{:064b}'.format(val)[::-1])) for (i, val) in king_position_values]
+    pawn_position_values_black = [
+        (i, int('{:064b}'.format(val)[::-1], 2)) for (i, val) in pawn_position_values
+    ]
 
-    # pawn_position_values = [
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-    #     [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
-    #     [0.3, 0.3, 0.3, 0.4, 0.4, 0.3, 0.3, 0.3],
-    #     [0.2, 0.2, 0.2, 0.25, 0.25, 0.2, 0.2, 0.2],
-    #     [0.1, 0.1, 0.1, 0.15, 0.15, 0.1, 0.1, 0.1],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0],
-    # ]
+    knight_center_values = 0b000000000011100001110000011100000111000000000000
+    knight_advanced_values = 0b001111000100010001000100011110000000000000000000
+    knight_back_rank_values = 0b111100001111000000000000000000000000000000000000
+    knight_edge_values = 0b100000011000000110000001100000011000000110000001
 
-    # knight_position_values = [
-    #     [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
-    #     [-0.2, -0.05, 0.0, 0.0, 0.0, 0.0, -0.05, -0.2],
-    #     [-0.1, 0.0, 0.05, 0.1, 0.1, 0.05, 0.0, -0.1],
-    #     [-0.1, 0.1, 0.1, 0.25, 0.25, 0.1, 0.1, -0.1],
-    #     [-0.1, 0.0, 0.1, 0.25, 0.25, 0.1, 0.0, -0.1],
-    #     [-0.1, 0.01, 0.05, 0.3, 0.3, 0.05, 0.01, -0.1],
-    #     [-0.2, -0.05, 0.0, 0.1, 0.1, 0.0, -0.05, -0.2],
-    #     [-0.2, -0.1, -0.05, -0.05, -0.05, -0.05, -0.1, -0.2],
-    # ]
+    knight_position_values = [
+        (0.5, knight_center_values), 
+        (0.4, knight_advanced_values), 
+        (0.3, knight_back_rank_values), 
+        (0.2, knight_edge_values)
+    ]
 
-    # king_position_values = [
-    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-    #     [-0.3, -0.4, -0.4, -0.5, -0.5, -0.4, -0.4, -0.3],
-    #     [-0.2, -0.3, -0.3, -0.4, -0.4, -0.3, -0.3, -0.2],
-    #     [-0.1, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.1],
-    #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2],
-    #     [0.2, 0.4, 0.1, 0.0, 0.0, 0.1, 0.4, 0.2],
-    # ]
+    knight_position_values_black = [
+        (i, int('{:064b}'.format(val)[::-1], 2)) for (i, val) in knight_position_values
+    ]
+
+
+    king_safety_values = 0b110000001100000011000000110000000000000000000000
+    king_early_central_values = 0b000000000000000000000000000000000011000000110000
+    king_endgame_values = 0b000000000000000000111100000111000001110000011100
+
+    king_position_values = [
+        (0.5, king_safety_values), 
+        (0.3, king_early_central_values), 
+        (0.2, king_endgame_values)
+    ]
+
+    king_position_values_black = [
+        (i, int('{:064b}'.format(val)[::-1], 2)) for (i, val) in king_position_values
+    ]
 
     def __init__(self, white: bool, copy=None):
         if copy:
